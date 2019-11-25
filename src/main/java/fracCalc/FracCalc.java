@@ -8,13 +8,19 @@ public class FracCalc {
 
     public static void main(String[] args)
     {
-    	System.out.println("what you want");
     	Scanner console = new Scanner(System.in);
-    	String s = console.nextLine();
-    	produceAnswer(s);
-    	System.out.print(produceAnswer(s));
+    	System.out.println("Welcome!");
+    	boolean runProgram = true;
+    	while (runProgram == true) {
+    		System.out.println("Equation: ");
+    		String s = console.nextLine();
+    		if (s.equals("quit")) {
+    			runProgram = false;
+    		}
+    		produceAnswer(s);
+    		System.out.println(produceAnswer(s));
         // TODO: Read the input from the user and call produceAnswer with an equation
-
+    	}
     }
 
     // ** IMPORTANT ** DO NOT DELETE THIS FUNCTION.  This function will be used to test your code
