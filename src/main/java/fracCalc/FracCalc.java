@@ -33,6 +33,12 @@ public class FracCalc {
     //      e.g. return ==> "1_1/4"
     public static String produceAnswer(String input) {
     	String operand1, operator, operand2;
+    	int negs = 0;
+    	for (int i = 0; i < input.length(); i++) {
+    		if (input.charAt(i) == '-') {
+    			negs++;
+    		}
+    	}
     	String answer = "";
     	int whole1, numerator1, denominator1, whole2, numerator2, denominator2;
         // TODO: Implement this function to produce the solution to the input
@@ -60,9 +66,9 @@ public class FracCalc {
     	} else if (operator.indexOf("-") != -1) {
     		answer = subtract(whole1, numerator1, denominator1, whole2, numerator2, denominator2);
     	} else if (operator.indexOf("*") != -1) {
-    		answer = multiply(whole1, numerator1, denominator1, whole2, numerator2, denominator2);
+    		answer = multiply(Math.abs(whole1), Math.abs(numerator1), denominator1, Math.abs(whole2), Math.abs(numerator2), denominator2, negs);
     	} else if (operator.indexOf("/") != -1) {
-    		answer = divide(whole1, numerator1, denominator1, whole2, numerator2, denominator2);
+    		answer = divide(Math.abs(whole1), Math.abs(numerator1), denominator1, Math.abs(whole2), Math.abs(numerator2), denominator2, negs);
     	}
         return answer;
     }
@@ -166,245 +172,167 @@ public class FracCalc {
     }
     
     public static String add(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2) {
-    	int theWhole, theNumerator, theDenominator;
-    	if (whole1 > 0 && whole2 > 0) {
-    		theWhole = 0;
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = (numerator1 * denominator2) + (numerator2 * denominator1);
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
+    	int theNumerator, theDenominator;
+    	int theWhole = 0;
+    	int newNumer1 = numerator1 + (Math.abs(whole1) * denominator1);
+    	if (whole1 < 0) {
+    		newNumer1 *= -1;
+    	}
+    	int newNumer2 = numerator2 + (Math.abs(whole2) * denominator2);
+    	if (whole2 < 0) {
+    		newNumer2 *= -1;
+    	}
+    	newNumer1 *= denominator2;
+    	newNumer2 *= denominator1;
+    	theDenominator = denominator1 * denominator2;
+    	theNumerator = newNumer1 + newNumer2;
+    	if (Math.abs(theNumerator) > theDenominator) {
+    		theWhole = theNumerator / theDenominator;
+    		theNumerator = Math.abs(theNumerator) - (Math.abs(theWhole) * theDenominator);
+    	}
+    	int a = 1;
+    	for (int i = 1; i < theDenominator; i++) {
+    		if ((theNumerator % i == 0) && (theDenominator % i == 0)) {
+    			a = i;
     		}
-    	} else if (whole1 > 0 && whole2 < 0) {
-    		theWhole = 0;
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = (numerator1 * denominator2) - (numerator2 * denominator1);
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 < 0 && whole2 > 0) {
-    		theWhole = 0;
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = (numerator2 * denominator1) - (numerator1 * denominator2);
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if ((whole1 == 0 && numerator1 == 0) && (whole2 != 0 || numerator2 != 0)) {
-    		numerator2 += (whole2 * denominator2);
-    		theNumerator = numerator2;
-    		theDenominator = denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if ((whole1 != 0 || numerator1 != 0) && (whole2 == 0 && numerator2 == 0)) {
-    		numerator1 += (whole1 * denominator1);
-    		theNumerator = numerator1;
-    		theDenominator = denominator1;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
+    	}
+    	theNumerator /= a;
+    	theDenominator /= a;
+    	if (theNumerator == theDenominator) {
+    		return "1";
+    	}
+    	if (theNumerator == 0) {
+    		return "" + theWhole;
+    	} else if (theWhole == 0){
+    		return "" + theNumerator + "/" + theDenominator;
     	} else {
-    		whole1 = Math.abs(whole1);
-    		whole2 = Math.abs(whole2);
-    		theWhole = (whole1 + whole2) * -1;
-    		theNumerator = (numerator1 * denominator2) + (numerator2 * denominator1);
-    		theDenominator = denominator1 * denominator2;
     		return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
     	}
     }
     
     public static String subtract(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2) {
-    	int theWhole, theNumerator, theDenominator;
+    	int theNumerator, theDenominator;
+    	int theWhole = 0;
     	if (whole1 == whole2 && numerator1 == numerator2) {
     		return "0";
-    	} else if (whole1 > 0 && whole2 > 0) {
-    		numerator1 += (whole1 * denominator1);
-        	numerator2 += (whole2 * denominator2);
-        	theNumerator = (numerator1 * denominator2) + (numerator2 * denominator1);
-        	theDenominator = denominator1 * denominator2;
-        	if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 > 0 && whole2 < 0) {
-    		numerator1 += (whole1 * denominator1);
-        	numerator2 += (Math.abs(whole2) * denominator2);
-        	theNumerator = (numerator1 * denominator2) + (numerator2 * denominator1);
-        	theDenominator = denominator1 * denominator2;
-        	if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 < 0 && whole2 > 0) {
-    		numerator1 += (Math.abs(whole1) * denominator1);
-        	numerator2 += (whole2 * denominator2);
-        	theNumerator = (numerator1 * denominator2) + (numerator2 * denominator1);
-        	theDenominator = denominator1 * denominator2;
-        	return "" + theNumerator + "/" + theDenominator;
-    	} else if (whole1 == whole2 && numerator1 == numerator2 && denominator1 == denominator2) {
-    		return "0";
-    	} else {
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = (numerator2 * denominator1) - (numerator1 * denominator2);
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
+    	}
+    	
+    	int newNumer1 = numerator1 + (Math.abs(whole1) * denominator1);
+    	if (whole1 < 0) {
+    		newNumer1 *= -1;
+    	}
+    	int newNumer2 = numerator2 + (Math.abs(whole2) * denominator2);
+    	if (whole2 < 0) {
+    		newNumer2 *= -1;
+    	}
+    	newNumer1 *= denominator2;
+    	newNumer2 *= denominator1;
+    	theDenominator = denominator1 * denominator2;
+    	theNumerator = newNumer1 - newNumer2;
+    	if (Math.abs(theNumerator) > theDenominator) {
+    		theWhole = theNumerator / theDenominator;
+    		theNumerator = Math.abs(theNumerator) - (Math.abs(theWhole) * theDenominator);
+    	}
+    	int a = 1;
+    	for (int i = 1; i < theDenominator; i++) {
+    		if ((theNumerator % i == 0) && (theDenominator % i == 0)) {
+    			a = i;
     		}
     	}
-    }
-    
-    public static String multiply(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2) {
-    	int theWhole, theNumerator, theDenominator;
-    	if ((whole1 == 0 && numerator1 == 0 && denominator1 == 1) || (whole2 == 0 && numerator2 == 0 && denominator2 == 1)) {
-    		return "0";
-    	} else if ((whole1 == 0 && numerator1 > 0) && (whole2 == 0 && numerator2 > 0)) {
-    		theNumerator = numerator1 * numerator2;
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (((whole1 < 0 || numerator1 < 0) && (whole2 < 0 || numerator2 < 0)) || ((whole1 > 0 && numerator1 > 0) && (whole2 > 0 && numerator2 > 0))) {
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = numerator1 * numerator2;
-    		theDenominator = denominator1 * denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 != 0 && numerator1 != 0 && whole2 != 0 && numerator2 == 0) {
-    		numerator1 += whole1 * denominator1;
-    		theNumerator = numerator1 * whole2;
-    		theDenominator = denominator1;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			if (theNumerator == 0) {
-    				return "" + theWhole;
-    			} else {
-    				return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    			}
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 != 0 && numerator1 == 0 && whole2 != 0 && numerator2 != 0) {
-    		numerator2 += whole2 * denominator2;
-    		theNumerator = numerator2 * whole1;
-    		theDenominator = denominator2;
-    		if (theNumerator > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			if (theNumerator == 0) {
-    				return "" + theWhole;
-    			} else {
-    				return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
-    			}
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
-    		}
-    	} else if (whole1 != 0 && whole2 != 0 && numerator1 == 0 && numerator2 == 0 && denominator1 == 1 && denominator2 == 1) {
-    		theWhole = whole1 * whole2;
+    	theNumerator /= a;
+    	theDenominator /= a;
+    	if (theNumerator == 0) {
     		return "" + theWhole;
+    	} else if (theWhole == 0){
+    		return "" + theNumerator + "/" + theDenominator;
     	} else {
-    		numerator1 += Math.abs(whole1) * Math.abs(denominator1);
-    		numerator2 += Math.abs(whole2) * Math.abs(denominator2);
-    		theNumerator = numerator1 * numerator2;
-    		theDenominator = denominator1 * denominator2;
-    		if (Math.abs(theNumerator) > theDenominator) {
-    			theWhole = theNumerator / theDenominator;
-    			theNumerator -= (theWhole * theDenominator);
-    			return "-" + Math.abs(theWhole) + "_" + theNumerator + "/" + theDenominator;
-    		} else {
-    			return "-" + Math.abs(theNumerator) + "/" + theDenominator;
-    		}
+    		return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
     	}
     }
     
-    public static String divide(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2) {
+    public static String multiply(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2, int negs) {
     	int theNumerator, theDenominator;
     	int theWhole = 0;
     	if (whole1 == 0 && numerator1 == 0 && denominator1 == 1) {
     		return "0";
     	}
-    	if (numerator1 == 0 && denominator1 == 1 && numerator2 == 0 && denominator2 == 1) {
-    		theNumerator = whole1;
-    		theDenominator = whole2;
-    	} else {
-    		numerator1 += (Math.abs(whole1) * denominator1);
-    		numerator2 += (Math.abs(whole2) * denominator2);
-    		theNumerator = numerator1 * denominator2;
-    		theDenominator = Math.abs(numerator2 * denominator1);
+    	if (whole1 == whole2 && numerator1 == numerator2) {
+    		return "1";
     	}
-    	if (((whole1 < 0 && whole2 < 0) || (whole1 > 0 && whole2 > 0)) || ((numerator1 > 0 && numerator2 > 0) || (numerator1 < 0 && numerator2 < 0))) {
-    		if (Math.abs(theNumerator) > theDenominator) {
-        		theWhole += theNumerator / theDenominator;
-        		theNumerator -= (theWhole * theDenominator);
-        		return "" + theWhole + "_" + Math.abs(theNumerator) + "/" + theDenominator;
-        	} else {
-        		return "" + theNumerator + "/" + theDenominator;
-        	}
-    	} else if (numerator1 < 0 || numerator2 < 0) {
-    		if (Math.abs(theNumerator) > theDenominator) {
-        		theWhole = theNumerator / theDenominator;
-        		theNumerator -= (theWhole * theDenominator);
-        		return "-" + Math.abs(theWhole) + "_" + Math.abs(theNumerator) + "/" + theDenominator;
-    		} else {
-    			return "-" + Math.abs(theNumerator) + "/" + theDenominator;
-    		}
-    	} else {
-    		if (Math.abs(theNumerator) > theDenominator) {
-        		theWhole = theNumerator / theDenominator;
-        		theNumerator -= (theWhole * theDenominator);
-        		return "" + theWhole + "_" + Math.abs(theNumerator) + "/" + theDenominator;
-    		} else {
-    			return "" + theNumerator + "/" + theDenominator;
+    	int newNumer1 = numerator1 + (Math.abs(whole1) * denominator1);
+    	if (whole1 < 0) {
+    		newNumer1 *= -1;
+    	}
+    	int newNumer2 = numerator2 + (Math.abs(whole2) * denominator2);
+    	if (whole2 < 0) {
+    		newNumer2 *= -1;
+    	}
+    	theNumerator = newNumer1 * newNumer2;
+    	if (negs == 1) {
+    		theNumerator *= -1;
+    	}
+    	theDenominator = denominator1 * denominator2;
+    	if (Math.abs(theNumerator) > theDenominator) {
+    		theWhole = theNumerator / theDenominator;
+    		theNumerator = Math.abs(theNumerator) - (Math.abs(theWhole) * theDenominator);
+    	}
+    	int a = 1;
+    	for (int i = 1; i < theDenominator; i++) {
+    		if ((theNumerator % i == 0) && (theDenominator % i == 0)) {
+    			a = i;
     		}
     	}
-    	
+    	theNumerator /= a;
+    	theDenominator /= a;
+    	if (theNumerator == 0) {
+    		return "" + theWhole;
+    	} else if (theWhole == 0){
+    		return "" + theNumerator + "/" + theDenominator;
+    	} else {
+    		return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
+    	}	
     }
-    // TODO: Fill in the space below with any helper methods that you think you will need
-
+    
+    public static String divide(int whole1, int numerator1, int denominator1, int whole2, int numerator2, int denominator2, int negs) {
+    	int theNumerator, theDenominator;
+    	int theWhole = 0;
+    	if (whole1 == 0 && numerator1 == 0 && denominator1 == 1) {
+    		return "0";
+    	}
+    	if (whole1 == whole2 && numerator1 == numerator2) {
+    		return "1";
+    	}
+    	int newNumer1 = numerator1 + (Math.abs(whole1) * denominator1);
+    	if (whole1 < 0) {
+    		newNumer1 *= -1;
+    	}
+    	int newNumer2 = numerator2 + (Math.abs(whole2) * denominator2);
+    	if (whole2 < 0) {
+    		newNumer2 *= -1;
+    	}
+    	theNumerator = newNumer1 * denominator2;
+    	if (negs == 1) {
+    		theNumerator *= -1;
+    	}
+    	theDenominator = newNumer2 * denominator1;
+    	if (Math.abs(theNumerator) > Math.abs(theDenominator)) {
+    		theWhole = theNumerator / Math.abs(theDenominator);
+    		theNumerator = Math.abs(theNumerator) - (Math.abs(theWhole) * theDenominator);
+    	}
+    	int a = 1;
+    	for (int i = 1; i < theDenominator; i++) {
+    		if ((theNumerator % i == 0) && (theDenominator % i == 0)) {
+    			a = i;
+    		}
+    	}
+    	theNumerator /= a;
+    	theDenominator /= a;
+    	if (theNumerator == 0) {
+    		return "" + theWhole;
+    	} else if (theWhole == 0){
+    		return "" + theNumerator + "/" + theDenominator;
+    	} else {
+    		return "" + theWhole + "_" + theNumerator + "/" + theDenominator;
+    	}
+    }
 }
